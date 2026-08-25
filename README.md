@@ -15,11 +15,11 @@ Automata Lab is an interactive educational web app for visually building and sim
 
 If Automata Lab helped you, consider supporting development.
 
-- 💙 **GCash** - for Philippine users: [Support via GCash](#)
-- 💳 **PayPal** - for international donations: [Support via PayPal](#)
+- 💙 **GCash** - for Philippine users: `09154895554`
+- 💳 **PayPal** - for international donations: [Support via PayPal](https://paypal.me/joannahargote)
 - ☕ Every contribution helps keep Automata Lab free and improving.
 
-Replace the `#` links above with the final payment URLs when they are ready. You may also enable the GitHub **Sponsor** button by setting up GitHub Sponsors.
+You may also enable the GitHub **Sponsor** button by setting up GitHub Sponsors.
 
 ## License
 
