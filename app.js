@@ -165,6 +165,10 @@ const helpDialog = document.getElementById('helpDialog');
 document.getElementById('helpLink').addEventListener('click', event => { event.preventDefault(); helpDialog.showModal(); });
 document.getElementById('closeHelp').addEventListener('click', () => helpDialog.close());
 helpDialog.addEventListener('click', event => { if (event.target === helpDialog) helpDialog.close(); });
+const supportDialog = document.getElementById('supportDialog');
+document.getElementById('supportLink').addEventListener('click', event => { event.preventDefault(); supportDialog.showModal(); });
+document.getElementById('closeSupport').addEventListener('click', () => supportDialog.close());
+supportDialog.addEventListener('click', event => { if (event.target === supportDialog) supportDialog.close(); });
 function runSimulation(inputOverride = null, testRun = false) {
   const start = nodes.find(node => node.type === 'start'); const input = (inputOverride === null ? document.getElementById('inputString').value : inputOverride).trim(); const symbols = input ? (input.includes(' ') ? input.split(/\s+/) : [...input]) : [];
   if (!start) { showResult(false, 'No start state', 'Add a start state before simulating.'); return; }
