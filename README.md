@@ -21,6 +21,13 @@ If Automata Lab helped you, consider supporting development.
 
 You may also enable the GitHub **Sponsor** button by setting up GitHub Sponsors.
 
+## Contact
+
+For questions, bug reports, or suggestions:
+
+- GitHub Issues: https://github.com/joannahargote/AutomataLab/issues
+- GitHub Profile: https://github.com/joannahargote
+
 ## License
 
 Copyright (c) 2026 Joannah C. Argote
