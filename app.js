@@ -102,7 +102,8 @@ function renderNodes() {
     nodesLayer.appendChild(group);
   });
 }
-function selectNode(id) { selectedNode = id; selectedEdge = null; render(); }
+function scrollInspectorIntoView() { const panel = document.querySelector('.left-panel'); const inspector = document.getElementById('inspector'); if (!panel || !inspector) return; requestAnimationFrame(() => panel.scrollTo({ top: Math.max(0, inspector.offsetTop - 12), behavior: 'smooth' })); }
+function selectNode(id) { selectedNode = id; selectedEdge = null; render(); scrollInspectorIntoView(); }
 function renderInspector() {
   const content = document.getElementById('inspectorContent'); const node = nodeById(selectedNode);
   const edge = edges.find(item => item.id === selectedEdge);
@@ -113,7 +114,7 @@ function renderInspector() {
   document.getElementById('deleteState').addEventListener('click', () => { nodes = nodes.filter(item => item.id !== node.id); edges = edges.filter(edge => edge.from !== node.id && edge.to !== node.id); selectedNode = null; render(); });
 }
 function editEdge(edge) {
-  selectedEdge = edge.id; selectedNode = null; render();
+  selectedEdge = edge.id; selectedNode = null; render(); scrollInspectorIntoView();
 }
 function drawDraft(source) { draftLayer.innerHTML = ''; const node = nodeById(source); const point = pointerPosition(window.lastPointerEvent || { clientX: 0, clientY: 0 }); if (!node || !window.lastPointerEvent) return; const path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('class', 'draft-edge'); path.setAttribute('d', `M ${node.x} ${node.y} L ${point.x} ${point.y}`); draftLayer.appendChild(path); }
 svg.addEventListener('pointermove', event => { window.lastPointerEvent = event; if (linkSource) renderEdges(); if (edgeDragging) { const point = pointerPosition(event), edge = edgeDragging.edge, from = nodeById(edge.from), to = nodeById(edge.to); if (from && to && edgeDragging.loop) { const dx = point.x - from.x, dy = point.y - from.y; edge.loopSide = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'top' : 'bottom'); renderEdges(); } else if (from && to && from.id !== to.id) { const dx = to.x - from.x, dy = to.y - from.y, length = Math.hypot(dx, dy); edge.offset = Math.round(((point.x - (from.x + to.x) / 2) * (-dy / length)) + ((point.y - (from.y + to.y) / 2) * (dx / length))); renderEdges(); } } });
