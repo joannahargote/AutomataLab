@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automata Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+  <div class="orientation-notice"><strong>Rotate to landscape</strong><small>Automata Lab needs a wide workspace for the graph editor.</small></div>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">A</span><span>Automata <b>Lab</b></span></div>
+    <nav class="machine-tabs" id="machineTabs" aria-label="Machines"></nav>
+    <div class="top-actions">
+      <span class="status-dot"></span><span class="status-label">LOCAL WORKSPACE</span>
+      <button class="icon-button" id="newMachineBtn" title="New machine">+ New</button>
+      <button class="icon-button" id="openBtn" title="Open machine JSON">Open</button><input type="file" id="openFile" accept=".json,application/json" hidden>
+      <button class="icon-button" id="settingsBtn" title="View settings">Settings</button>
+      <details class="save-menu"><summary class="icon-button">Save</summary><div class="save-menu-options"><button id="saveBtn">Save as JSON</button><button id="printBtn">Save as PDF</button></div></details>
+      <button class="icon-button" id="resetBtn" title="Reset workspace">Reset</button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="sidebar left-panel">
+      <section class="panel-section palette-section">
+        <div class="section-kicker">COMPONENTS</div>
+        <h2>State palette</h2>
+        <p class="muted">Drag a component onto the canvas.</p>
+        <div class="palette-list">
+          <button class="palette-item" draggable="true" data-node-type="start"><span class="state-icon start-icon"><i></i></span><span><strong>Start state</strong><small>Initial position</small></span><span class="drag-hint">::</span></button>
+          <button class="palette-item" draggable="true" data-node-type="normal"><span class="state-icon"><i></i></span><span><strong>Regular state</strong><small>Transition position</small></span><span class="drag-hint">::</span></button>
+          <button class="palette-item" draggable="true" data-node-type="accept"><span class="state-icon accept-icon"><i></i></span><span><strong>Accept state</strong><small>Final position</small></span><span class="drag-hint">::</span></button>
+          <button class="palette-item" draggable="true" data-node-type="trap"><span class="state-icon trap-icon"><i></i></span><span><strong>Trap state</strong><small>Dead position</small></span><span class="drag-hint">::</span></button>
+        </div>
+        <div class="tool-callout"><span class="tip-mark">i</span><span>To connect states, choose <b>Arrow</b>, then drag from one state to another.</span></div>
+        <button class="add-arrow" id="arrowTool"><span>+</span> Add transition arrow</button>
+      </section>
+
+      <section class="panel-section inspector-section" id="inspector">
+        <div class="section-kicker">INSPECTOR</div>
+        <h2>Selected state</h2>
+        <div id="inspectorContent" class="empty-inspector"><span class="crosshair">+</span><p>Select a state<br>to inspect it.</p></div>
+      </section>
+    </aside>
+    <div class="panel-resizer" data-resize="left" title="Resize palette"></div>
+
+    <section class="workspace-panel">
+      <div class="workspace-toolbar">
+        <div class="tool-status"><span class="tool-icon">&#10010;</span><strong id="modeLabel">Select & move</strong><span class="toolbar-divider"></span><span class="muted">Click states to select</span></div>
+        <div class="toolbar-actions"><div class="history-controls"><button id="undoBtn" title="Undo (Ctrl+Z)" aria-label="Undo">&#8630;</button><button id="redoBtn" title="Redo (Ctrl+Y)" aria-label="Redo">&#8631;</button></div><div class="zoom-controls"><button id="zoomOut">-</button><span id="zoomLabel">100%</span><button id="zoomIn">+</button></div></div>
+      </div>
+      <div class="canvas-wrap" id="canvasWrap">
+        <div class="canvas-grid"></div>
+        <svg id="automataCanvas" viewBox="0 0 1000 680" preserveAspectRatio="none" aria-label="Automata construction canvas">
+          <defs>
+            <marker id="arrowhead" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 z" fill="#25333a"></path></marker>
+            <marker id="activeArrowhead" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 z" fill="#e65f42"></path></marker>
+            <marker id="acceptedArrowhead" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 z" fill="#4d9b69"></path></marker>
+            <marker id="deadArrowhead" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto"><path d="M0,0 L9,3.5 L0,7 z" fill="#d96d5c"></path></marker>
+          </defs>
+          <g id="edgesLayer"></g><g id="nodesLayer"></g><g id="draftLayer"></g>
+        </svg>
+        <div class="canvas-empty" id="canvasEmpty"><span>+</span><strong>Build your automaton</strong><small>Drop states here to begin</small></div>
+        <div class="coordinate-readout canvas-coordinates" id="coordinateReadout">x 000 &nbsp; y 000</div>
+        <div class="canvas-legend"><span><i class="legend-start"></i> Start</span><span><i class="legend-accept"></i> Accept</span><span><i class="legend-active"></i> Active path</span></div>
+        <div class="machine-toast dfa" id="machineToast"><span class="machine-toast-dot"></span><div><strong>DFA</strong><small>deterministic machine</small></div></div>
+      </div>
+      <div class="workspace-footer"><div class="footer-credit"><strong>Automata Lab <span>v1</span></strong><small>Developed by Joannah C. Argote, MIT</small><small>&copy; 2026 Joannah C. Argote. Licensed under the MIT License.</small></div><a class="help-link" href="#helpDialog" id="helpLink">How to use</a><span><kbd>drag</kbd> move state</span><span><kbd>click</kbd> select state</span><span><kbd>delete</kbd> remove selection</span></div>
+    </section>
+    <div class="panel-resizer" data-resize="right" title="Resize inspector"></div>
+
+    <aside class="sidebar right-panel">
+      <div class="right-tabs" role="tablist" aria-label="Right panel views"><button class="right-tab active" id="simulationTab" role="tab" aria-selected="true" data-panel="simulationView">Simulation</button><button class="right-tab" id="definitionTab" role="tab" aria-selected="false" data-panel="definitionView">Machine definition</button></div>
+      <div id="simulationView" class="right-view active" role="tabpanel">
+      <section class="panel-section simulation-section">
+        <div class="section-kicker">SIMULATION</div>
+        <h2>Input string</h2>
+        <label class="input-label" for="alphabetInput">Allowed alphabet</label>
+        <div class="string-input-wrap"><span class="prompt">&#931;</span><input id="alphabetInput" value="a, b" aria-label="Allowed alphabet"></div>
+        <div class="input-note">Separate symbols with commas. <code>eps</code> is always available.</div>
+        <label class="input-label" for="inputString">Feed the automaton</label>
+        <div class="string-input-wrap"><span class="prompt">&gt;_</span><input id="inputString" value="a b b a" aria-label="Input string"></div>
+        <div class="input-note">Separate symbols with spaces. Epsilon: <code>eps</code></div>
+        <button class="simulate-button" id="simulateBtn"><span class="play-icon">&#9654;</span> Run simulation <kbd>Enter</kbd></button>
+        <div class="result-panel" id="resultPanel"><span class="result-icon">?</span><div><strong>Ready to simulate</strong><small>Build a graph, then provide a string.</small></div></div>
+      </section>
+
+      <section class="panel-section trace-section">
+        <div class="trace-heading"><div><div class="section-kicker">TRACE</div><h2>Execution trace</h2></div><span class="step-count" id="stepCount">0 / 0</span></div>
+        <div class="trace-list" id="traceList"><div class="trace-empty">Your path will appear here<br>after simulation.</div></div>
+        <div class="tested-results" id="testedResults"></div>
+      </section>
+      </div>
+      <div id="definitionView" class="right-view" role="tabpanel" hidden>
+      <section class="panel-section formal-section">
+        <div class="section-kicker">MACHINE DEFINITION</div>
+        <h2>Machine definition</h2>
+        <div class="machine-type" id="machineType"><span class="machine-type-dot"></span><strong>Detecting machine type</strong><small></small></div>
+        <div class="formal-block" id="formalBlock">Build states and transitions to generate the 5-tuple.</div>
+        <details class="table-details" open><summary>Transition table</summary><div id="transitionTable" class="transition-table"></div></details>
+        <div class="generator-box"><strong>Generate test strings</strong><small>Test every string up to a chosen length.</small><div class="generator-controls"><input id="maxLengthInput" type="number" min="0" max="8" value="3" aria-label="Maximum test length"><button class="save-edge" id="generateBtn">Generate</button></div><div class="generator-note" id="generatorNote">A warning appears before large runs.</div></div>
+      </section>
+      <section class="panel-section legend-section"><div class="section-kicker">QUICK REFERENCE</div><div class="reference-row"><span class="reference-key">NFA</span><span>Nondeterministic finite automaton</span></div><div class="reference-row"><span class="reference-key">DFA</span><span>One path per symbol</span></div></section>
+      </div>
+    </aside>
+  </main>
+  <div class="print-meta" id="printMeta"></div>
+  <article class="print-output" id="printOutput"><header class="print-header"><strong>Automata Lab <span>v1</span></strong><small id="printTimestampText"></small></header><section class="print-diagram" id="printDiagram"></section><section class="print-definition" id="printDefinitionOutput"></section><section class="print-tests" id="printTestsOutput"></section><footer class="print-footer"><strong>Automata Lab v1</strong><span>Developed by Joannah C. Argote, MIT</span><span>&copy; 2026 Joannah C. Argote. Licensed under the MIT License.</span></footer></article>
+  <dialog class="help-dialog" id="helpDialog"><div class="help-dialog-header"><div><div class="section-kicker">AUTOMATA LAB V1</div><h2>How to use</h2></div><button class="close-help" id="closeHelp" aria-label="Close help">&times;</button></div><div class="help-content"><p><strong>Build</strong> Drag states onto the canvas. Choose Add transition arrow, then drag between states or back to the same state for a loop.</p><p><strong>Label</strong> Select an arrow and choose its transition label from the dropdown. Sigma accepts any symbol in the alphabet; eps is epsilon.</p><p><strong>Simulate</strong> Enter a string and press Run simulation. Click trace rows to inspect each character. Green means accepting; red means trapped or rejected.</p><p><strong>Edit</strong> Drag states or arrows to move them. Use Delete to remove a selected item, and Ctrl+Z / Ctrl+Y for undo and redo.</p><p><strong>Machines</strong> Use tabs to switch machines. They save in this browser automatically; Save downloads the current machine as JSON.</p></div></dialog>
+  <dialog class="settings-dialog" id="settingsDialog"><div class="help-dialog-header"><div><div class="section-kicker">PREFERENCES</div><h2>View settings</h2></div><button class="close-help" id="closeSettings" aria-label="Close settings">&times;</button></div><div class="settings-options"><label><input type="checkbox" id="showGridSetting" checked> Show canvas grid</label><label><input type="checkbox" id="showLabelsSetting" checked> Show transition labels</label><label><input type="checkbox" id="showCheckerSetting" checked> Show DFA/NFA checker</label><label><input type="checkbox" id="showLegendSetting" checked> Show canvas legend</label></div></dialog>
+  <dialog class="print-dialog" id="printDialog"><div class="help-dialog-header"><div><div class="section-kicker">OUTPUT</div><h2>Print machine</h2></div><button class="close-help" id="closePrint" aria-label="Close print options">&times;</button></div><div class="print-options"><label><input type="checkbox" id="printMachine" checked> Machine graph</label><label><input type="checkbox" id="printDefinition" checked> 5-tuple and transition table</label><label><input type="checkbox" id="printTests" checked> Accepted and rejected tests</label><button class="simulate-button" id="confirmPrint">Print selected</button></div></dialog>
+  <script src="app.js"></script>
+</body>
+</html>
