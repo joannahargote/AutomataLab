@@ -170,6 +170,10 @@ const supportDialog = document.getElementById('supportDialog');
 document.getElementById('supportLink').addEventListener('click', event => { event.preventDefault(); supportDialog.showModal(); });
 document.getElementById('closeSupport').addEventListener('click', () => supportDialog.close());
 supportDialog.addEventListener('click', event => { if (event.target === supportDialog) supportDialog.close(); });
+const contactDialog = document.getElementById('contactDialog');
+document.getElementById('contactLink').addEventListener('click', event => { event.preventDefault(); contactDialog.showModal(); });
+document.getElementById('closeContact').addEventListener('click', () => contactDialog.close());
+contactDialog.addEventListener('click', event => { if (event.target === contactDialog) contactDialog.close(); });
 function runSimulation(inputOverride = null, testRun = false) {
   const start = nodes.find(node => node.type === 'start'); const input = (inputOverride === null ? document.getElementById('inputString').value : inputOverride).trim(); const symbols = input ? (input.includes(' ') ? input.split(/\s+/) : [...input]) : [];
   if (!start) { showResult(false, 'No start state', 'Add a start state before simulating.'); return; }

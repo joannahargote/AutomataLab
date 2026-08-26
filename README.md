@@ -19,6 +19,8 @@ If Automata Lab helped you, consider supporting development.
 - 💳 **PayPal** - for international donations: [Support via PayPal](https://paypal.me/joannahargote)
 - ☕ Every contribution helps keep Automata Lab free and improving.
 
+You may also enable the GitHub **Sponsor** button by setting up GitHub Sponsors.
+
 ## Contact
 
 For questions, bug reports, or suggestions:
